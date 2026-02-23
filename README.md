@@ -5,7 +5,7 @@
 ランダム配置された9×9グリッドに答えを入力して、九九をマスターする練習Webアプリです。
 一問一答ではなく「全部入力してから一括判定」する独自のグリッド方式で、楽しく・効率よく練習できます。
 
-🌐 **[今すぐ遊ぶ](https://あなたのID.github.io/kuku-master/)**
+🌐 **[今すぐ遊ぶ](https://ryoutarou555-ctrl.github.io/kuku-master/)**
 
 ---
 
@@ -76,14 +76,14 @@
 ## 🚀 使い方
 
 ### オンラインで使う
-👉 **[かけ算マスターを開く](https://あなたのID.github.io/kuku-master/)**
+👉 **[かけ算マスターを開く](https://ryoutarou555-ctrl.github.io/kuku-master/)**
 
 Safariで開いて「ホーム画面に追加」すると、アプリとして使えます。
 
 ### ローカルで動かす
 ```bash
 # リポジトリをクローン
-git clone https://github.com/あなたのID/kuku-master.git
+git clone https://github.com/ryoutarou555-ctrl/kuku-master.git
 
 # index.html をブラウザで開くだけ
 open index.html

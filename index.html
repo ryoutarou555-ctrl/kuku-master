@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>かけ算マスター</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --kid-bg:#fff9f0; --kid-primary:#ff6b6b; --kid-secondary:#ffd93d;
+  --kid-accent:#6bcb77; --kid-blue:#4d96ff; --kid-purple:#c77dff;
+  --adult-bg:#0d1117; --adult-primary:#00d4ff; --adult-secondary:#7c3aed;
+  --adult-accent:#10b981; --adult-surface:#161b22; --adult-border:#30363d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito','Zen Maru Gothic',sans-serif;min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column;align-items:center}
+
+/* ===== TOP ===== */
+#screen-top{background:var(--kid-bg);justify-content:center;padding:30px 20px;position:relative;overflow:hidden}
+#screen-top::before{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,#ffd93d44 0%,transparent 70%);top:-100px;right:-100px;border-radius:50%}
+#screen-top::after{content:'';position:absolute;width:300px;height:300px;background:radial-gradient(circle,#ff6b6b33 0%,transparent 70%);bottom:-80px;left:-80px;border-radius:50%}
+.top-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:20px;max-width:420px;width:100%}
+.app-logo{text-align:center}
+.app-logo .emoji{font-size:64px;line-height:1;display:block;animation:bounce 2s infinite}
+.app-logo h1{font-size:34px;font-weight:900;background:linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcb77);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.app-logo p{font-size:13px;color:#888;margin-top:4px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.nickname-box{background:white;border-radius:20px;padding:18px 22px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.nickname-box label{font-size:12px;color:#888;font-weight:700;display:block;margin-bottom:8px}
+.nickname-box input{width:100%;border:2px solid #eee;border-radius:12px;padding:11px 14px;font-size:18px;font-family:inherit;font-weight:700;outline:none;transition:border .2s}
+.nickname-box input:focus{border-color:var(--kid-primary)}
+.mode-selector{background:white;border-radius:20px;padding:18px 22px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.mode-selector h3{font-size:12px;color:#888;font-weight:700;margin-bottom:12px}
+.mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode-tab{padding:14px 10px;border-radius:14px;border:2px solid #eee;cursor:pointer;text-align:center;transition:all .2s;background:#fafafa}
+.mode-tab.selected{border-color:var(--kid-primary);background:linear-gradient(135deg,#fff5f5,#fff);box-shadow:0 4px 12px rgba(255,107,107,.2)}
+.mode-tab .tab-icon{font-size:26px;display:block}
+.mode-tab .tab-name{font-size:13px;font-weight:700;color:#333;margin-top:4px}
+.mode-tab .tab-range{font-size:11px;color:#aaa}
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%}
+.stat-card{background:white;border-radius:16px;padding:12px 8px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.stat-card .s-val{font-size:20px;font-weight:900}
+.stat-card .s-label{font-size:10px;color:#aaa;margin-top:2px}
+.stat-card:nth-child(1) .s-val{color:var(--kid-primary)}
+.stat-card:nth-child(2) .s-val{color:var(--kid-blue)}
+.stat-card:nth-child(3) .s-val{color:var(--kid-accent)}
+.badge-row{width:100%;background:white;border-radius:20px;padding:16px 20px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.badge-row h3{font-size:12px;color:#888;font-weight:700;margin-bottom:10px}
+.badge-list{display:flex;gap:8px;flex-wrap:wrap}
+.badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;transition:transform .2s;cursor:help}
+.badge.earned{background:linear-gradient(135deg,#ffd93d,#ff6b6b);box-shadow:0 4px 12px rgba(255,107,107,.3)}
+.badge.locked{background:#eee;filter:grayscale(1) opacity(.4)}
+.badge:hover{transform:scale(1.15)}
+.btn-start{width:100%;padding:18px;background:linear-gradient(135deg,var(--kid-primary),#ff8e53);border:none;border-radius:18px;color:white;font-size:20px;font-weight:900;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px rgba(255,107,107,.4);letter-spacing:1px}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,107,107,.5)}
+.btn-history{width:100%;padding:13px;background:white;border:2px solid #eee;border-radius:16px;color:#888;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s}
+.btn-history:hover{border-color:var(--kid-blue);color:var(--kid-blue)}
+.btn-dashboard{width:100%;padding:13px;background:white;border:2px solid #eee;border-radius:16px;color:#888;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s}
+.btn-dashboard:hover{border-color:var(--kid-purple);color:var(--kid-purple)}
+.btn-practice{width:100%;padding:14px;background:linear-gradient(135deg,#fff3e0,#fff);border:2px solid #ff9800;border-radius:16px;color:#e65100;font-size:15px;font-weight:900;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 3px 12px rgba(255,152,0,.2)}
+.btn-practice:hover{background:linear-gradient(135deg,#ff9800,#ff6d00);color:white;box-shadow:0 6px 20px rgba(255,152,0,.4);transform:translateY(-1px)}
+.btn-practice:disabled{opacity:.4;pointer-events:none;border-color:#eee;background:#fafafa;color:#bbb}
+.practice-label{display:inline-block;font-size:10px;background:#ff9800;color:white;border-radius:99px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+
+/* ===== GAME ===== */
+#screen-game{background:var(--kid-bg);padding:14px;justify-content:flex-start;gap:12px}
+#screen-game.adult-mode{background:var(--adult-bg)}
+.game-header{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between}
+.btn-back{display:flex;align-items:center;gap:5px;padding:8px 14px;border-radius:12px;border:none;background:white;color:#888;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.btn-back.adult{background:var(--adult-surface);color:#666;border:1px solid var(--adult-border)}
+.btn-back:hover{color:var(--kid-primary)}
+.btn-back.adult:hover{color:var(--adult-primary)}
+.timer-box{display:flex;align-items:center;gap:6px;background:white;border-radius:12px;padding:8px 14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.timer-box.adult{background:var(--adult-surface);border:1px solid var(--adult-border)}
+.timer-val{font-size:18px;font-weight:900;color:#333;font-variant-numeric:tabular-nums}
+.timer-val.adult{color:var(--adult-primary)}
+.progress-bar-wrap{width:100%;max-width:520px;background:#eee;border-radius:99px;height:8px;overflow:hidden}
+.progress-bar-wrap.adult{background:var(--adult-border)}
+.progress-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--kid-accent),var(--kid-blue));transition:width .3s ease}
+.progress-bar-fill.adult{background:linear-gradient(90deg,var(--adult-primary),var(--adult-accent))}
+.grid-wrap{width:100%;max-width:520px;overflow-x:auto}
+.kuku-table{border-collapse:separate;border-spacing:3px;margin:0 auto}
+
+/* Kid grid: 44px */
+.kuku-table th,.kuku-table td{width:44px;height:44px;text-align:center;vertical-align:middle;border-radius:8px;font-size:14px;font-weight:700}
+.kuku-table th{background:linear-gradient(135deg,var(--kid-primary),#ff8e53);color:white;font-size:15px;box-shadow:0 2px 6px rgba(255,107,107,.3)}
+.th-corner{background:linear-gradient(135deg,#333,#555) !important;font-size:16px}
+.kuku-table.adult th,.kuku-table.adult td{background:linear-gradient(135deg,var(--adult-secondary),var(--adult-primary));box-shadow:0 2px 8px rgba(0,212,255,.2)}
+
+/* Adult grid override: 56px, bigger font */
+.kuku-table.adult th,.kuku-table.adult td{width:56px;height:56px;font-size:16px;border-radius:10px}
+.kuku-table.adult th{font-size:17px}
+.kuku-table.adult .th-corner{background:linear-gradient(135deg,#1a1a2e,#16213e) !important;font-size:18px}
+
+.cell{background:white;cursor:pointer;transition:all .15s;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.cell.adult{background:var(--adult-surface);border:1px solid var(--adult-border);color:#aaa}
+.cell:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.cell.row-hl{background:#fff3cd;box-shadow:0 2px 8px rgba(255,193,7,.2)}
+.cell.row-hl.adult{background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.2)}
+.cell.col-hl{background:#fce4ff;box-shadow:0 2px 8px rgba(199,125,255,.2)}
+.cell.col-hl.adult{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)}
+.kuku-table th.header-hl{background:linear-gradient(135deg,#f59e0b,#fbbf24) !important;box-shadow:0 4px 12px rgba(245,158,11,.5) !important;transform:scale(1.08);z-index:2;position:relative}
+.kuku-table.adult th.header-hl{background:linear-gradient(135deg,#06b6d4,#00d4ff) !important;box-shadow:0 4px 12px rgba(0,212,255,.5) !important}
+.cell.selected{background:linear-gradient(135deg,#fff5f5,#fff0ff);border:2px solid var(--kid-primary);box-shadow:0 4px 16px rgba(255,107,107,.3);transform:scale(1.08);z-index:3;position:relative}
+.cell.selected.adult{background:rgba(0,212,255,.1);border:2px solid var(--adult-primary);box-shadow:0 4px 16px rgba(0,212,255,.3)}
+.cell.correct{background:linear-gradient(135deg,#e8fff0,#d0ffe8);color:#22c55e;animation:popIn .3s ease}
+.cell.correct.adult{background:rgba(16,185,129,.15);color:var(--adult-accent)}
+.cell.wrong{background:linear-gradient(135deg,#fff0f0,#ffe0e0);color:var(--kid-primary);animation:shake .4s ease}
+.cell.wrong.adult{background:rgba(255,100,100,.15);color:#ff6b6b}
+.cell.filled{background:linear-gradient(135deg,#f0f4ff,#e8eeff);color:#4d96ff;font-size:15px;font-weight:900}
+.cell.filled.adult{background:rgba(77,150,255,.12);color:#7eb8ff;border-color:rgba(77,150,255,.3)}
+@keyframes popIn{0%{transform:scale(.8)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.empty-hint{font-size:10px;color:#ccc}
+.kuku-table.adult .empty-hint{font-size:12px}
+
+/* Numpad */
+.numpad-wrap{width:100%;max-width:320px}
+.numpad-prompt{text-align:center;font-size:13px;font-weight:700;color:#aaa;margin-bottom:8px}
+.numpad-eq{text-align:center;font-size:28px;font-weight:900;color:#333;margin-bottom:10px;min-height:38px}
+.numpad-eq.adult{color:var(--adult-primary)}
+.numpad-eq .eq-answer{display:inline-block;min-width:60px;border-bottom:3px solid var(--kid-primary);padding-bottom:2px}
+.numpad-eq.adult .eq-answer{border-bottom-color:var(--adult-primary)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.numpad-btn{padding:14px;border-radius:14px;border:none;font-size:22px;font-weight:900;font-family:inherit;cursor:pointer;transition:all .15s;background:white;color:#333;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.numpad-btn.adult{background:var(--adult-surface);color:#ccc;border:1px solid var(--adult-border)}
+.numpad-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.numpad-btn:active{transform:scale(.95)}
+.numpad-btn.del{background:#fff5f5;color:var(--kid-primary);box-shadow:0 3px 10px rgba(255,107,107,.15)}
+.numpad-btn.del.adult{background:rgba(255,100,100,.1);color:#ff6b6b}
+.numpad-btn.confirm{background:linear-gradient(135deg,var(--kid-accent),#22c55e);color:white;box-shadow:0 4px 14px rgba(107,203,119,.4);font-size:18px}
+.numpad-btn.confirm.adult{background:linear-gradient(135deg,var(--adult-accent),#059669)}
+.btn-judge-wrap{width:100%;max-width:320px;margin-top:4px}
+.btn-judge{width:100%;padding:16px;border-radius:16px;border:none;background:linear-gradient(135deg,#4d96ff,#6bcb77);color:white;font-size:18px;font-weight:900;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(77,150,255,.4);opacity:.4;pointer-events:none}
+.btn-judge.adult{background:linear-gradient(135deg,var(--adult-primary),var(--adult-accent));box-shadow:0 4px 16px rgba(0,212,255,.3)}
+.btn-judge.ready{opacity:1;pointer-events:auto;animation:readyPulse 1.5s infinite}
+@keyframes readyPulse{0%,100%{box-shadow:0 4px 16px rgba(77,150,255,.4)}50%{box-shadow:0 8px 28px rgba(77,150,255,.7);transform:translateY(-1px)}}
+.btn-judge.ready.adult{animation:readyPulseAdult 1.5s infinite}
+@keyframes readyPulseAdult{0%,100%{box-shadow:0 4px 16px rgba(0,212,255,.3)}50%{box-shadow:0 8px 28px rgba(0,212,255,.6);transform:translateY(-1px)}}
+
+/* ===== RESULT ===== */
+#screen-result{background:var(--kid-bg);justify-content:center;padding:30px 20px}
+#screen-result.adult-mode{background:var(--adult-bg)}
+.result-inner{max-width:420px;width:100%;display:flex;flex-direction:column;align-items:center;gap:18px}
+.result-hero{text-align:center}
+.result-emoji{font-size:72px;display:block;animation:bigBounce 1s ease}
+@keyframes bigBounce{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.result-title{font-size:30px;font-weight:900;color:#333}
+.result-title.adult{color:var(--adult-primary)}
+.result-sub{font-size:14px;color:#aaa;margin-top:4px}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%}
+.result-stat{background:white;border-radius:16px;padding:16px 10px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.result-stat.adult{background:var(--adult-surface);border:1px solid var(--adult-border)}
+.result-stat .rs-val{font-size:24px;font-weight:900}
+.result-stat .rs-label{font-size:11px;color:#aaa;margin-top:4px}
+.result-stat:nth-child(1) .rs-val{color:var(--kid-primary)}
+.result-stat:nth-child(2) .rs-val{color:var(--kid-blue)}
+.result-stat:nth-child(3) .rs-val{color:var(--kid-accent)}
+.new-badge-announce{width:100%;background:linear-gradient(135deg,#fff7e6,#fff);border:2px solid var(--kid-secondary);border-radius:18px;padding:14px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 16px rgba(255,217,61,.25)}
+.new-badge-announce.adult{background:rgba(124,58,237,.1);border-color:var(--adult-secondary);box-shadow:0 4px 16px rgba(124,58,237,.2)}
+.nba-icon{font-size:36px}
+.nba-text h4{font-size:13px;font-weight:900;color:#f59e0b}
+.nba-text h4.adult{color:var(--adult-primary)}
+.nba-text p{font-size:12px;color:#888}
+.btn-row{display:flex;gap:12px;width:100%}
+.btn-secondary{flex:1;padding:15px;border-radius:16px;border:2px solid #eee;background:white;font-size:15px;font-weight:700;font-family:inherit;color:#555;cursor:pointer;transition:all .2s}
+.btn-secondary.adult{background:var(--adult-surface);border-color:var(--adult-border);color:#aaa}
+.btn-secondary:hover{border-color:var(--kid-primary);color:var(--kid-primary)}
+.btn-primary{flex:1;padding:15px;border-radius:16px;border:none;background:linear-gradient(135deg,var(--kid-primary),#ff8e53);font-size:15px;font-weight:900;font-family:inherit;color:white;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(255,107,107,.4)}
+.btn-primary.adult{background:linear-gradient(135deg,var(--adult-primary),var(--adult-secondary));box-shadow:0 4px 16px rgba(0,212,255,.3)}
+.btn-primary:hover{transform:translateY(-2px)}
+
+/* ===== HISTORY ===== */
+#screen-history{background:var(--kid-bg);padding:0 0 40px;justify-content:flex-start}
+.history-header{width:100%;background:white;padding:16px 20px 12px;box-shadow:0 2px 12px rgba(0,0,0,.07);position:sticky;top:0;z-index:10}
+.history-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.history-header-top h2{font-size:19px;font-weight:900;color:#333}
+.filter-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.filter-tabs::-webkit-scrollbar{display:none}
+.filter-tab{flex-shrink:0;padding:6px 14px;border-radius:99px;border:2px solid #eee;background:white;font-size:13px;font-weight:700;font-family:inherit;color:#888;cursor:pointer;transition:all .2s;white-space:nowrap}
+.filter-tab.active{background:linear-gradient(135deg,var(--kid-primary),#ff8e53);border-color:transparent;color:white;box-shadow:0 3px 10px rgba(255,107,107,.35)}
+.history-body{width:100%;max-width:500px;padding:16px 16px 0;display:flex;flex-direction:column;gap:10px}
+.history-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px}
+.hs-card{background:white;border-radius:14px;padding:13px 10px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.hs-card .hs-val{font-size:20px;font-weight:900}
+.hs-card .hs-label{font-size:11px;color:#aaa;margin-top:3px}
+.hs-card:nth-child(1) .hs-val{color:var(--kid-primary)}
+.hs-card:nth-child(2) .hs-val{color:var(--kid-blue)}
+.hs-card:nth-child(3) .hs-val{color:var(--kid-accent)}
+.section-label{font-size:12px;font-weight:700;color:#bbb;letter-spacing:1px;text-transform:uppercase;margin:4px 0 2px}
+.history-card{background:white;border-radius:16px;padding:13px 15px;box-shadow:0 3px 12px rgba(0,0,0,.07);display:flex;align-items:center;gap:12px;animation:slideIn .25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hc-rank{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900}
+.hc-rank.gold{background:linear-gradient(135deg,#ffd700,#ffa500);color:white;box-shadow:0 3px 8px rgba(255,165,0,.4)}
+.hc-rank.silver{background:linear-gradient(135deg,#c0c0c0,#a0a0a0);color:white}
+.hc-rank.bronze{background:linear-gradient(135deg,#cd7f32,#a0522d);color:white}
+.hc-rank.normal{background:#f0f0f0;color:#aaa;font-size:12px}
+.hc-body{flex:1;min-width:0}
+.hc-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.hc-player{font-size:14px;font-weight:900;color:#333}
+.hc-mode{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+.hc-mode.kid{background:#fff3cd;color:#b8860b}
+.hc-mode.adult{background:rgba(0,212,255,.12);color:var(--adult-primary)}
+.hc-bottom{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hc-stat{font-size:12px;color:#aaa}
+.hc-stat span{font-weight:700;color:#555}
+.hc-date{font-size:11px;color:#ccc;margin-left:auto}
+.hc-accuracy-bar{height:4px;border-radius:99px;background:#eee;margin-top:6px;overflow:hidden}
+.hc-accuracy-fill{height:100%;border-radius:99px;transition:width .4s ease}
+.history-empty{text-align:center;padding:40px 20px;color:#bbb}
+.history-empty .he-icon{font-size:48px;display:block;margin-bottom:12px}
+.history-empty p{font-size:15px;font-weight:700}
+
+/* ===== DASHBOARD ===== */
+#screen-dashboard{background:#f8f7ff;padding:0 0 40px;justify-content:flex-start}
+.dash-header{width:100%;background:white;padding:16px 20px 12px;box-shadow:0 2px 12px rgba(0,0,0,.07);position:sticky;top:0;z-index:10}
+.dash-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.dash-header-top h2{font-size:19px;font-weight:900;color:#333}
+.dash-player-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.dash-player-tabs::-webkit-scrollbar{display:none}
+.dash-tab{flex-shrink:0;padding:6px 14px;border-radius:99px;border:2px solid #eee;background:white;font-size:13px;font-weight:700;font-family:inherit;color:#888;cursor:pointer;transition:all .2s;white-space:nowrap}
+.dash-tab.active{background:linear-gradient(135deg,var(--kid-purple),var(--kid-blue));border-color:transparent;color:white;box-shadow:0 3px 10px rgba(199,125,255,.35)}
+.dash-body{width:100%;max-width:500px;padding:16px 16px 0;display:flex;flex-direction:column;gap:14px}
+.dash-section{background:white;border-radius:18px;padding:18px;box-shadow:0 3px 14px rgba(0,0,0,.07)}
+.dash-section h3{font-size:14px;font-weight:900;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+/* Player summary */
+.dash-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.ds-card{border-radius:14px;padding:14px 12px;text-align:center}
+.ds-card:nth-child(1){background:linear-gradient(135deg,#fff5f5,#ffe8e8)}
+.ds-card:nth-child(2){background:linear-gradient(135deg,#f0f8ff,#e0f0ff)}
+.ds-card:nth-child(3){background:linear-gradient(135deg,#f0fff4,#e0ffe8)}
+.ds-card:nth-child(4){background:linear-gradient(135deg,#fdfff0,#f5ffe0)}
+.ds-card .dc-val{font-size:24px;font-weight:900}
+.ds-card:nth-child(1) .dc-val{color:var(--kid-primary)}
+.ds-card:nth-child(2) .dc-val{color:var(--kid-blue)}
+.ds-card:nth-child(3) .dc-val{color:var(--kid-accent)}
+.ds-card:nth-child(4) .dc-val{color:#f59e0b}
+.ds-card .dc-label{font-size:11px;color:#888;margin-top:3px}
+/* Growth chart */
+.growth-chart{width:100%;height:100px;position:relative}
+.growth-bars{display:flex;align-items:flex-end;gap:4px;height:80px;padding:0 4px}
+.g-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.g-bar{width:100%;border-radius:6px 6px 0 0;min-height:4px;transition:height .4s ease}
+.g-bar-label{font-size:9px;color:#bbb;font-weight:700}
+/* Weakness heatmap */
+.weakness-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
+.wg-header{font-size:11px;font-weight:900;color:white;border-radius:6px;padding:5px 2px;text-align:center}
+.wg-cell{border-radius:6px;padding:6px 2px;text-align:center;font-size:11px;font-weight:700;cursor:default;transition:transform .15s;position:relative}
+.wg-cell:hover{transform:scale(1.1)}
+.wg-no-data{font-size:10px;color:#ccc;text-align:center;padding:16px 0}
+/* Weakness list */
+.weakness-list{display:flex;flex-direction:column;gap:8px}
+.wl-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#fef9f9}
+.wl-item.ok{background:#f0fff4}
+.wl-dan{font-size:16px;font-weight:900;min-width:36px;color:var(--kid-primary)}
+.wl-dan.ok{color:var(--kid-accent)}
+.wl-bar-wrap{flex:1;background:#f5f5f5;border-radius:99px;height:8px;overflow:hidden}
+.wl-bar{height:100%;border-radius:99px}
+.wl-pct{font-size:12px;font-weight:700;min-width:36px;text-align:right}
+/* Recent results table */
+.recent-table{width:100%;border-collapse:collapse;font-size:13px}
+.recent-table th{padding:6px 10px;background:#f5f5f5;color:#888;font-size:11px;letter-spacing:.5px;text-align:left;border-radius:6px}
+.recent-table td{padding:8px 10px;border-bottom:1px solid #f0f0f0;color:#444}
+.recent-table tr:last-child td{border-bottom:none}
+.acc-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700}
+.acc-badge.great{background:#e8fff0;color:#22c55e}
+.acc-badge.good{background:#eff6ff;color:#3b82f6}
+.acc-badge.ok{background:#fefce8;color:#ca8a04}
+.acc-badge.poor{background:#fff1f2;color:#f43f5e}
+.dash-empty{text-align:center;padding:40px 20px;color:#bbb}
+.dash-empty .de-icon{font-size:48px;display:block;margin-bottom:12px}
+
+/* ===== CONFIRM ===== */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
+.confirm-overlay.show{display:flex}
+.confirm-dialog{background:white;border-radius:24px;padding:28px;max-width:300px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:dialogIn .25s ease}
+.confirm-dialog.adult{background:#1a1f2e;border:1px solid var(--adult-border)}
+@keyframes dialogIn{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.confirm-dialog .cd-icon{font-size:44px;display:block;margin-bottom:10px}
+.confirm-dialog h3{font-size:18px;font-weight:900;color:#333;margin-bottom:8px}
+.confirm-dialog h3.adult{color:#ccc}
+.confirm-dialog p{font-size:13px;color:#888;margin-bottom:22px;line-height:1.6}
+.confirm-dialog .cd-btns{display:flex;gap:10px}
+.confirm-dialog .cd-cancel{flex:1;padding:13px;border-radius:14px;border:2px solid #eee;background:white;font-size:14px;font-weight:700;font-family:inherit;color:#888;cursor:pointer}
+.confirm-dialog.adult .cd-cancel{background:var(--adult-surface);border-color:var(--adult-border);color:#666}
+.confirm-dialog .cd-ok{flex:1;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--kid-primary),#ff8e53);font-size:14px;font-weight:900;font-family:inherit;color:white;cursor:pointer;box-shadow:0 4px 14px rgba(255,107,107,.4)}
+.confirm-dialog.adult .cd-ok{background:linear-gradient(135deg,var(--adult-primary),var(--adult-secondary))}
+
+/* Float indicator */
+.float-correct{position:fixed;pointer-events:none;font-size:22px;font-weight:900;animation:floatUp .8s ease forwards;z-index:100}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.5)}}
+</style>
+</head>
+<body>
+
+<!-- ===== TOP ===== -->
+<div id="screen-top" class="screen active">
+  <div class="top-inner">
+    <div class="app-logo">
+      <span class="emoji">✖️</span>
+      <h1>かけ算マスター</h1>
+      <p>グリッドを埋めて計算力を鍛えよう</p>
+    </div>
+    <div class="nickname-box">
+      <label>ニックネーム</label>
+      <input type="text" id="nickname-input" placeholder="なまえを入れてね" maxlength="10">
+    </div>
+    <div class="mode-selector">
+      <h3>モードを選択</h3>
+      <div class="mode-tabs">
+        <div class="mode-tab selected" data-mode="kid" onclick="selectMode('kid',this)">
+          <span class="tab-icon">🐣</span>
+          <div class="tab-name">キッズモード</div>
+          <div class="tab-range">1〜9の段</div>
+        </div>
+        <div class="mode-tab" data-mode="adult" onclick="selectMode('adult',this)">
+          <span class="tab-icon">🔥</span>
+          <div class="tab-name">アドバンスドモード</div>
+          <div class="tab-range">10〜20の段</div>
+        </div>
+      </div>
+    </div>
+    <div class="stats-row" id="top-stats">
+      <div class="stat-card"><div class="s-val" id="stat-games">0</div><div class="s-label">プレイ回数</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-accuracy">—</div><div class="s-label">正解率</div></div>
+      <div class="stat-card"><div class="s-val" id="stat-best">—</div><div class="s-label">ベストタイム</div></div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#fff8e1,#fff);"><div class="s-val" id="stat-streak" style="color:#f59e0b">0</div><div class="s-label">連続プレイ🔥</div></div>
+    </div>
+    <div class="badge-row">
+      <h3>🏅 バッジコレクション（<span id="badge-player-label">—</span>）</h3>
+      <div class="badge-list" id="badge-list"></div>
+    </div>
+    <button class="btn-start" onclick="startGame()">スタート！ 🚀</button>
+    <button class="btn-practice" id="btn-practice" onclick="startPractice()">🎯 苦手集中練習</button>
+    <button class="btn-history" onclick="showHistory()">📋 プレイ履歴を見る</button>
+    <button class="btn-dashboard" onclick="showDashboard()">📊 まなびレポート</button>
+  </div>
+</div>
+
+<!-- ===== GAME ===== -->
+<div id="screen-game" class="screen">
+  <div class="game-header" id="game-header">
+    <button class="btn-back" id="btn-back" onclick="confirmBackToMenu()">← メニュー</button>
+    <span id="game-mode-label" style="font-size:12px;font-weight:700;color:#aaa"></span>
+    <div class="timer-box" id="timer-box">
+      <span>⏱</span>
+      <span class="timer-val" id="timer-display">00:00</span>
+    </div>
+  </div>
+  <div class="progress-bar-wrap" id="progress-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="grid-wrap">
+    <table class="kuku-table" id="kuku-table"></table>
+  </div>
+  <div class="numpad-wrap" id="numpad-wrap">
+    <div class="numpad-prompt">マスをタップして答えを入力</div>
+    <div class="numpad-eq" id="numpad-eq">
+      <span id="eq-left">?</span> × <span id="eq-right">?</span> = <span class="eq-answer" id="eq-answer">　</span>
+    </div>
+    <div class="numpad">
+      <button class="numpad-btn" onclick="numInput('1')">1</button>
+      <button class="numpad-btn" onclick="numInput('2')">2</button>
+      <button class="numpad-btn" onclick="numInput('3')">3</button>
+      <button class="numpad-btn" onclick="numInput('4')">4</button>
+      <button class="numpad-btn" onclick="numInput('5')">5</button>
+      <button class="numpad-btn" onclick="numInput('6')">6</button>
+      <button class="numpad-btn" onclick="numInput('7')">7</button>
+      <button class="numpad-btn" onclick="numInput('8')">8</button>
+      <button class="numpad-btn" onclick="numInput('9')">9</button>
+      <button class="numpad-btn" onclick="numInput('0')">0</button>
+      <button class="numpad-btn del" onclick="numDel()">⌫</button>
+      <button class="numpad-btn confirm" onclick="numConfirm()">✓</button>
+    </div>
+  </div>
+  <div class="btn-judge-wrap">
+    <button class="btn-judge" id="btn-judge" onclick="judgeAll()">📝 全部入力したら判定！</button>
+  </div>
+</div>
+
+<!-- ===== CONFIRM DIALOG ===== -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-dialog" id="confirm-dialog">
+    <span class="cd-icon">🏠</span>
+    <h3>メニューに戻る？</h3>
+    <p>途中の記録は保存されません。<br>本当にメニューに戻りますか？</p>
+    <div class="cd-btns">
+      <button class="cd-cancel" onclick="closeConfirm()">続ける</button>
+      <button class="cd-ok" onclick="doBackToMenu()">戻る</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HISTORY ===== -->
+<div id="screen-history" class="screen">
+  <div class="history-header">
+    <div class="history-header-top">
+      <h2>📋 プレイ履歴</h2>
+      <button class="btn-back" onclick="goTop()">← メニュー</button>
+    </div>
+    <div class="filter-tabs" id="hist-filter-tabs"></div>
+  </div>
+  <div class="history-body" id="history-body"></div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="screen-dashboard" class="screen">
+  <div class="dash-header">
+    <div class="dash-header-top">
+      <h2>📊 まなびレポート</h2>
+      <button class="btn-back" onclick="goTop()">← メニュー</button>
+    </div>
+    <div class="dash-player-tabs" id="dash-player-tabs"></div>
+  </div>
+  <div class="dash-body" id="dash-body"></div>
+</div>
+
+<!-- ===== RESULT ===== -->
+<div id="screen-result" class="screen">
+  <div class="result-inner">
+    <div class="result-hero">
+      <span class="result-emoji" id="result-emoji">🎉</span>
+      <div class="result-title" id="result-title">すごい！</div>
+      <div class="result-sub" id="result-sub">全問正解達成！</div>
+    </div>
+    <div class="result-stats">
+      <div class="result-stat"><div class="rs-val" id="res-accuracy">—</div><div class="rs-label">正解率</div></div>
+      <div class="result-stat"><div class="rs-val" id="res-time">—</div><div class="rs-label">タイム</div></div>
+      <div class="result-stat"><div class="rs-val" id="res-best">—</div><div class="rs-label">ベスト</div></div>
+    </div>
+    <div class="new-badge-announce" id="new-badge-box" style="display:none">
+      <div class="nba-icon" id="new-badge-icon">🏅</div>
+      <div class="nba-text">
+        <h4 id="new-badge-title">新しいバッジ獲得！</h4>
+        <p id="new-badge-desc">—</p>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" id="res-btn-top" onclick="goTop()">トップへ</button>
+      <button class="btn-primary" id="res-btn-retry" onclick="startGame()">もう一回！</button>
+    </div>
+    <button class="btn-history" style="margin-top:8px" onclick="showHistory()">📋 履歴を見る</button>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let state = {
+  nickname:'プレイヤー', mode:'kid',
+  cols:[], rows:[], cells:{}, selected:null, currentInput:'',
+  timerInterval:null, elapsed:0, totalCells:0, correctCount:0, wrongCount:0,
+  stats:{ games:0, totalCorrect:0, totalAnswers:0, kidBest:null, adultBest:null },
+  streak:0,
+  history:[], // [{nickname,mode,accuracy,elapsed,correct,total,date,danStats}]
+  playStreak:0, lastPlayDate:null, isPracticeMode:false,
+  playerBadges:{}, // {nickname: {first_clear:bool,...}}
+  historyFilter:'all',
+  dashPlayer:null,
+};
+
+const BADGE_DEFS = [
+  {id:'first_clear', icon:'🎯', name:'はじめての全クリア'},
+  {id:'perfect',     icon:'💯', name:'パーフェクト'},
+  {id:'speed_kid',   icon:'⚡', name:'スピードスター（60秒以内）'},
+  {id:'speed_adult', icon:'🔥', name:'大人のスピードキング（120秒以内）'},
+  {id:'adult_unlock',icon:'🔓', name:'アドバンスドチャレンジャー'},
+  {id:'streak3',     icon:'🌟', name:'3連続正解'},
+  {id:'all_badges',  icon:'👑', name:'コンプリートマスター'},
+];
+const EMPTY_BADGES = ()=>({first_clear:false,perfect:false,speed_kid:false,speed_adult:false,adult_unlock:false,streak3:false,all_badges:false});
+
+// ===== INIT =====
+function init(){
+  loadData();
+  renderBadges();
+  updateTopStats();
+  document.getElementById('nickname-input').value = state.nickname;
+  document.getElementById('nickname-input').addEventListener('input',e=>{
+    state.nickname = e.target.value||'プレイヤー';
+    saveData();
+    renderBadges();
+    updateTopStats();
+  });
+  syncModeTabUI();
+}
+
+function loadData(){
+  try{
+    const d = localStorage.getItem('kakuzan_v2');
+    if(d){
+      const p = JSON.parse(d);
+      state.stats    = p.stats    || state.stats;
+      state.nickname = p.nickname || state.nickname;
+      state.mode     = p.mode     || state.mode;
+      state.history  = p.history  || [];
+      state.playerBadges = p.playerBadges || {};
+      state.playStreak = p.playStreak || 0;
+      state.lastPlayDate = p.lastPlayDate || null;
+    }
+  }catch(e){}
+}
+
+function saveData(){
+  try{
+    localStorage.setItem('kakuzan_v2', JSON.stringify({
+      stats:state.stats, nickname:state.nickname, mode:state.mode,
+      history:state.history, playerBadges:state.playerBadges,
+      playStreak:state.playStreak, lastPlayDate:state.lastPlayDate,
+    }));
+  }catch(e){}
+}
+
+function getBadges(nickname){
+  if(!state.playerBadges[nickname]) state.playerBadges[nickname]=EMPTY_BADGES();
+  return state.playerBadges[nickname];
+}
+
+function syncModeTabUI(){
+  document.querySelectorAll('.mode-tab').forEach(t=>{
+    t.classList.toggle('selected', t.dataset.mode===state.mode);
+  });
+}
+
+function selectMode(mode,el){
+  state.mode=mode; saveData(); syncModeTabUI();
+}
+
+// ===== TOP STATS ===== (per current nickname)
+function updateTopStats(){
+  const myHistory = state.history.filter(h=>h.nickname===state.nickname);
+  document.getElementById('stat-games').textContent = myHistory.length;
+  const acc = myHistory.length>0
+    ? Math.round(myHistory.reduce((s,h)=>s+h.accuracy,0)/myHistory.length)+'%'
+    : '—';
+  document.getElementById('stat-accuracy').textContent = acc;
+  const modeHistory = myHistory.filter(h=>h.mode===state.mode);
+  const best = modeHistory.length>0
+    ? modeHistory.reduce((b,h)=>(!b||h.elapsed<b)?h.elapsed:b,null)
+    : null;
+  document.getElementById('stat-best').textContent = best?formatTime(best):'—';
+  // Streak
+  updatePlayStreak();
+  const streakEl = document.getElementById('stat-streak');
+  if(streakEl) streakEl.textContent = state.playStreak + '日';
+  // Practice button: enable only if enough weak data
+  const weakDans = getWeakDans(state.nickname, 3);
+  const practBtn = document.getElementById('btn-practice');
+  if(practBtn){
+    practBtn.disabled = weakDans.length === 0;
+    practBtn.title = weakDans.length===0 ? '練習データが貯まると使えます（3回以上プレイしてね）' : '苦手な段を集中練習！';
+  }
+}
+
+function updatePlayStreak(){
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now()-86400000).toDateString();
+  if(state.lastPlayDate === today) return; // already counted today
+  if(state.lastPlayDate === yesterday){
+    state.playStreak++;
+  } else if(state.lastPlayDate !== today){
+    state.playStreak = state.lastPlayDate ? 0 : state.playStreak;
+  }
+  // Don't update lastPlayDate here - only on actual play completion
+}
+
+// Returns array of weak dan numbers for a player (accuracy < threshold)
+function getWeakDans(nickname, minGames=3){
+  const ph = state.history.filter(h=>h.nickname===nickname);
+  const danAgg={};
+  ph.forEach(h=>{
+    if(!h.danStats) return;
+    Object.entries(h.danStats).forEach(([dan,s])=>{
+      if(!danAgg[dan]) danAgg[dan]={correct:0,wrong:0};
+      danAgg[dan].correct+=s.correct; danAgg[dan].wrong+=s.wrong;
+    });
+  });
+  return Object.entries(danAgg)
+    .filter(([dan,s])=>{
+      const total=s.correct+s.wrong;
+      if(total<minGames) return false;
+      return (s.correct/total) < 0.8;
+    })
+    .sort(([,a],[,b])=>(a.correct/(a.correct+a.wrong))-(b.correct/(b.correct+b.wrong)))
+    .map(([dan])=>Number(dan));
+}
+
+function renderBadges(){
+  const nick = state.nickname;
+  document.getElementById('badge-player-label').textContent = nick;
+  const badges = getBadges(nick);
+  const list = document.getElementById('badge-list');
+  list.innerHTML='';
+  BADGE_DEFS.forEach(b=>{
+    const el=document.createElement('div');
+    el.className='badge '+(badges[b.id]?'earned':'locked');
+    el.textContent=b.icon; el.title=b.name;
+    list.appendChild(el);
+  });
+}
+
+// ===== PRACTICE MODE =====
+function startPractice(){
+  const weakDans = getWeakDans(state.nickname, 3);
+  if(weakDans.length === 0){
+    alert('まだ練習データが少ないです。通常モードで3回以上プレイしてから使えます！');
+    return;
+  }
+  // Pick top 6 weakest dans
+  const targetDans = weakDans.slice(0, Math.min(6, weakDans.length));
+  state.isPracticeMode = true;
+  state.nickname = document.getElementById('nickname-input').value || 'プレイヤー';
+
+  // Build grid using weak dans for both rows and cols
+  const size = Math.min(targetDans.length, 6);
+  state.rows = shuffle([...targetDans]).slice(0, size);
+  state.cols = shuffle([...targetDans]).slice(0, size);
+  state.cells = {};
+  state.selected = null; state.currentInput = '';
+  state.correctCount = state.wrongCount = state.streak = state.elapsed = 0;
+  state.totalCells = size * size;
+  state.rows.forEach(r=>state.cols.forEach(c=>{
+    state.cells[`${r},${c}`]={answered:false,correct:false,filled:false};
+  }));
+
+  const isAdult = state.mode === 'adult';
+  const gs = document.getElementById('screen-game');
+  gs.className = 'screen active' + (isAdult?' adult-mode':'');
+  document.getElementById('game-header').className = 'game-header'+(isAdult?' adult':'');
+  document.getElementById('btn-back').className = 'btn-back'+(isAdult?' adult':'');
+  document.getElementById('timer-box').className = 'timer-box'+(isAdult?' adult':'');
+  document.getElementById('timer-display').className = 'timer-val'+(isAdult?' adult':'');
+  document.getElementById('progress-wrap').className = 'progress-bar-wrap'+(isAdult?' adult':'');
+  document.getElementById('progress-fill').className = 'progress-bar-fill'+(isAdult?' adult':'');
+  document.getElementById('progress-fill').style.width = '0%';
+
+  const modeLabel = document.getElementById('game-mode-label');
+  if(modeLabel) modeLabel.textContent = '🎯 苦手集中練習';
+
+  const judgeBtn = document.getElementById('btn-judge');
+  judgeBtn.className = 'btn-judge'+(isAdult?' adult':'');
+  judgeBtn.classList.remove('ready');
+  judgeBtn.textContent = '📝 全部入力したら判定！';
+
+  buildTable();
+  applyAdultNumpad(isAdult);
+  showScreen('screen-game');
+  startTimer();
+}
+
+// ===== GAME START =====
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+
+function startGame(){
+  state.nickname = document.getElementById('nickname-input').value||'プレイヤー';
+  const isAdult  = state.mode==='adult';
+  const range    = isAdult?[10,11,12,13,14,15,16,17,18,19,20]:[1,2,3,4,5,6,7,8,9];
+  const size     = isAdult?6:9;
+
+  state.isPracticeMode = false;
+  state.rows      = shuffle([...range]).slice(0,size);
+  state.cols      = shuffle([...range]).slice(0,size);
+  state.cells     = {};
+  state.selected  = null;
+  state.currentInput='';
+  state.correctCount=state.wrongCount=state.streak=state.elapsed=0;
+  state.totalCells = size*size;
+
+  state.rows.forEach(r=>state.cols.forEach(c=>{
+    state.cells[`${r},${c}`]={answered:false,correct:false,filled:false};
+  }));
+
+  const gs = document.getElementById('screen-game');
+  gs.className = 'screen active'+(isAdult?' adult-mode':'');
+  document.getElementById('game-header').className = 'game-header'+(isAdult?' adult':'');
+  document.getElementById('btn-back').className   = 'btn-back'+(isAdult?' adult':'');
+  document.getElementById('timer-box').className  = 'timer-box'+(isAdult?' adult':'');
+  document.getElementById('timer-display').className = 'timer-val'+(isAdult?' adult':'');
+  document.getElementById('progress-wrap').className = 'progress-bar-wrap'+(isAdult?' adult':'');
+  document.getElementById('progress-fill').className = 'progress-bar-fill'+(isAdult?' adult':'');
+  document.getElementById('progress-fill').style.width='0%';
+
+  const modeLabel = document.getElementById('game-mode-label');
+  if(modeLabel) modeLabel.textContent = isAdult ? '🔥 アドバンスド' : '🐣 キッズ';
+  const judgeBtn = document.getElementById('btn-judge');
+  judgeBtn.className = 'btn-judge'+(isAdult?' adult':'');
+  judgeBtn.classList.remove('ready');
+  judgeBtn.textContent='📝 全部入力したら判定！';
+
+  buildTable();
+  applyAdultNumpad(isAdult);
+  showScreen('screen-game');
+  startTimer();
+}
+
+function buildTable(){
+  const isAdult = state.mode==='adult';
+  const table   = document.getElementById('kuku-table');
+  table.className='kuku-table'+(isAdult?' adult':'');
+  table.innerHTML='';
+
+  const thead=document.createElement('thead');
+  const hr=document.createElement('tr');
+  const corner=document.createElement('th');
+  corner.className='th-corner'; corner.textContent='×';
+  hr.appendChild(corner);
+  state.cols.forEach(c=>{const th=document.createElement('th');th.textContent=c;hr.appendChild(th);});
+  thead.appendChild(hr); table.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+  state.rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    const th=document.createElement('th'); th.textContent=r; tr.appendChild(th);
+    state.cols.forEach(c=>{
+      const td=document.createElement('td');
+      td.className='cell'+(isAdult?' adult':'');
+      td.id=`cell-${r}-${c}`;
+      td.innerHTML='<span class="empty-hint">？</span>';
+      td.onclick=()=>selectCell(r,c);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+}
+
+function selectCell(r,c){
+  const key=`${r},${c}`;
+  if(state.cells[key]&&state.cells[key].answered) return;
+  state.selected=key; state.currentInput='';
+  const isAdult=state.mode==='adult';
+  const base='cell'+(isAdult?' adult':'');
+
+  state.rows.forEach(row=>state.cols.forEach(col=>{
+    const el=document.getElementById(`cell-${row}-${col}`);
+    if(!el) return;
+    const k=`${row},${col}`;
+    if(state.cells[k]&&state.cells[k].filled) return;
+    if(k===key) el.className=base+' selected';
+    else if(row===r) el.className=base+' row-hl';
+    else if(col===c) el.className=base+' col-hl';
+    else el.className=base;
+  }));
+
+  const table=document.getElementById('kuku-table');
+  table.querySelectorAll('th').forEach(th=>th.classList.remove('header-hl'));
+  const theadThs=table.querySelectorAll('thead th');
+  const colIdx=state.cols.indexOf(c);
+  if(colIdx>=0&&theadThs[colIdx+1]) theadThs[colIdx+1].classList.add('header-hl');
+  const rowIdx=state.rows.indexOf(r);
+  const tbodyTrs=table.querySelectorAll('tbody tr');
+  if(rowIdx>=0&&tbodyTrs[rowIdx]) tbodyTrs[rowIdx].querySelector('th').classList.add('header-hl');
+
+  updateEqDisplay();
+}
+
+function updateEqDisplay(){
+  if(!state.selected){
+    document.getElementById('eq-left').textContent='?';
+    document.getElementById('eq-right').textContent='?';
+    document.getElementById('eq-answer').textContent='　';
+    return;
+  }
+  const[r,c]=state.selected.split(',').map(Number);
+  document.getElementById('eq-left').textContent=r;
+  document.getElementById('eq-right').textContent=c;
+  document.getElementById('eq-answer').textContent=state.currentInput||'　';
+}
+
+function applyAdultNumpad(isAdult){
+  const eq=document.getElementById('numpad-eq');
+  eq.className='numpad-eq'+(isAdult?' adult':'');
+  document.querySelectorAll('.numpad-btn').forEach(b=>{
+    const base='numpad-btn'+(isAdult?' adult':'');
+    if(b.classList.contains('confirm')) b.className=base+' confirm';
+    else if(b.classList.contains('del')) b.className=base+' del';
+    else b.className=base;
+  });
+  document.getElementById('numpad-wrap').querySelector('.numpad-prompt').style.color=isAdult?'#556':'#aaa';
+}
+
+function numInput(d){if(!state.selected)return;if(state.currentInput.length>=3)return;state.currentInput+=d;updateEqDisplay();}
+function numDel(){if(!state.selected)return;state.currentInput=state.currentInput.slice(0,-1);updateEqDisplay();}
+
+function numConfirm(){
+  if(!state.selected||state.currentInput==='') return;
+  const[r,c]=state.selected.split(',').map(Number);
+  const isAdult=state.mode==='adult';
+  const el=document.getElementById(`cell-${r}-${c}`);
+  state.cells[state.selected].userInput=parseInt(state.currentInput);
+  state.cells[state.selected].filled=true;
+  el.className='cell filled'+(isAdult?' adult':'');
+  el.textContent=state.currentInput;
+
+  const filledCount=Object.values(state.cells).filter(c=>c.filled).length;
+  document.getElementById('progress-fill').style.width=(filledCount/state.totalCells*100)+'%';
+  const judgeBtn=document.getElementById('btn-judge');
+  if(filledCount===state.totalCells){judgeBtn.classList.add('ready');judgeBtn.textContent='🎯 判定する！';}
+  else{judgeBtn.classList.remove('ready');judgeBtn.textContent=`📝 あと${state.totalCells-filledCount}マス`;}
+
+  // Clear highlights
+  const isA=state.mode==='adult', base='cell'+(isA?' adult':'');
+  state.rows.forEach(row=>state.cols.forEach(col=>{
+    const el2=document.getElementById(`cell-${row}-${col}`);
+    if(!el2)return;
+    const k=`${row},${col}`;
+    if(state.cells[k]&&state.cells[k].filled) return;
+    el2.className=base;
+  }));
+  document.getElementById('kuku-table').querySelectorAll('th').forEach(th=>th.classList.remove('header-hl'));
+  state.selected=null; state.currentInput=''; updateEqDisplay();
+}
+
+function judgeAll(){
+  clearInterval(state.timerInterval);
+  const isAdult=state.mode==='adult';
+  state.correctCount=state.wrongCount=0;
+  let maxStreak=0,curStreak=0;
+
+  // per-dan stats for weakness analysis
+  const danStats={}; // {dan: {correct:0, wrong:0}}
+  const trackDan=(dan,isOk)=>{
+    if(!danStats[dan]) danStats[dan]={correct:0,wrong:0};
+    isOk?danStats[dan].correct++:danStats[dan].wrong++;
+  };
+
+  state.rows.forEach(r=>{
+    state.cols.forEach(c=>{
+      const k=`${r},${c}`, cell=state.cells[k];
+      const el=document.getElementById(`cell-${r}-${c}`);
+      if(!el) return;
+      const correct=r*c;
+      if(cell.filled&&cell.userInput===correct){
+        cell.correct=true; state.correctCount++; state.stats.totalCorrect++; state.stats.totalAnswers++;
+        curStreak++; maxStreak=Math.max(maxStreak,curStreak);
+        el.className='cell correct'+(isAdult?' adult':''); el.textContent=correct;
+        trackDan(r,true); trackDan(c,true);
+      } else if(cell.filled){
+        cell.correct=false; state.wrongCount++; state.stats.totalAnswers++; curStreak=0;
+        el.className='cell wrong'+(isAdult?' adult':'');
+        el.innerHTML=`<span style="text-decoration:line-through;font-size:10px;opacity:.6">${cell.userInput}</span><br><span style="font-size:12px">${correct}</span>`;
+        trackDan(r,false); trackDan(c,false);
+      } else {
+        el.className='cell wrong'+(isAdult?' adult':''); el.textContent=correct;
+        state.wrongCount++; state.stats.totalAnswers++; curStreak=0;
+        trackDan(r,false); trackDan(c,false);
+      }
+    });
+  });
+
+  state.streak=maxStreak; state.stats.games++;
+  const accuracy=Math.round(state.correctCount/(state.correctCount+state.wrongCount)*100);
+
+  if(accuracy>=70){
+    if(isAdult){if(!state.stats.adultBest||state.elapsed<state.stats.adultBest)state.stats.adultBest=state.elapsed;}
+    else{if(!state.stats.kidBest||state.elapsed<state.stats.kidBest)state.stats.kidBest=state.elapsed;}
+  }
+
+  const now=new Date();
+  const dateStr=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  // Update play streak
+  const todayStr = new Date().toDateString();
+  const yesterdayStr = new Date(Date.now()-86400000).toDateString();
+  if(state.lastPlayDate !== todayStr){
+    if(state.lastPlayDate === yesterdayStr) state.playStreak++;
+    else if(state.lastPlayDate !== null) state.playStreak = 1;
+    else state.playStreak = 1;
+    state.lastPlayDate = todayStr;
+  }
+
+  state.history.unshift({
+    nickname:state.nickname, mode:state.mode, accuracy, isPractice:state.isPracticeMode,
+    elapsed:state.elapsed, correct:state.correctCount, total:state.totalCells,
+    date:dateStr, danStats,
+  });
+  if(state.history.length>200) state.history=state.history.slice(0,200);
+  saveData();
+  setTimeout(()=>showResult(accuracy),800);
+}
+
+function showResult(accuracy){
+  const isAdult=state.mode==='adult';
+  document.getElementById('screen-result').className='screen active'+(isAdult?' adult-mode':'');
+  const emoji=accuracy===100?'🎉':accuracy>=80?'😄':accuracy>=60?'🙂':'😅';
+  document.getElementById('result-emoji').textContent=emoji;
+  const title=accuracy===100?'パーフェクト！':accuracy>=80?'すごい！':accuracy>=60?'よくできました！':'がんばったね！';
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-title').className='result-title'+(isAdult?' adult':'');
+  document.getElementById('result-sub').textContent=`正解数: ${state.correctCount} / ${state.totalCells}`;
+  document.getElementById('res-accuracy').textContent=accuracy+'%';
+  document.getElementById('res-time').textContent=formatTime(state.elapsed);
+  const myHistory=state.history.filter(h=>h.nickname===state.nickname&&h.mode===state.mode);
+  const best=myHistory.length>0?myHistory.reduce((b,h)=>(!b||h.elapsed<b)?h.elapsed:b,null):null;
+  document.getElementById('res-best').textContent=best?formatTime(best):'—';
+  document.querySelectorAll('.result-stat').forEach(s=>s.className='result-stat'+(isAdult?' adult':''));
+
+  const newBadge=checkBadges(accuracy,state.elapsed);
+  if(newBadge){
+    const box=document.getElementById('new-badge-box');
+    box.style.display='flex';
+    box.className='new-badge-announce'+(isAdult?' adult':'');
+    document.getElementById('new-badge-icon').textContent=newBadge.icon;
+    document.getElementById('new-badge-title').textContent='新しいバッジ獲得！';
+    document.getElementById('new-badge-title').className=isAdult?'adult':'';
+    document.getElementById('new-badge-desc').textContent=newBadge.name;
+  } else document.getElementById('new-badge-box').style.display='none';
+
+  document.getElementById('res-btn-top').className='btn-secondary'+(isAdult?' adult':'');
+  document.getElementById('res-btn-retry').className='btn-primary'+(isAdult?' adult':'');
+  showScreen('screen-result');
+}
+
+function checkBadges(accuracy,elapsed){
+  const isAdult=state.mode==='adult', nick=state.nickname;
+  const b=getBadges(nick); let newBadge=null;
+  if(!b.first_clear){b.first_clear=true;newBadge=BADGE_DEFS[0];}
+  if(!b.perfect&&accuracy===100){b.perfect=true;newBadge=BADGE_DEFS[1];}
+  if(!b.speed_kid&&!isAdult&&elapsed<=60){b.speed_kid=true;newBadge=BADGE_DEFS[2];}
+  if(!b.speed_adult&&isAdult&&elapsed<=120){b.speed_adult=true;newBadge=BADGE_DEFS[3];}
+  if(!b.adult_unlock&&isAdult){b.adult_unlock=true;newBadge=BADGE_DEFS[4];}
+  if(!b.streak3&&state.streak>=3){b.streak3=true;newBadge=BADGE_DEFS[5];}
+  if(!b.all_badges&&[b.first_clear,b.perfect,b.speed_kid,b.speed_adult,b.adult_unlock,b.streak3].every(v=>v)){b.all_badges=true;newBadge=BADGE_DEFS[6];}
+  state.playerBadges[nick]=b; saveData();
+  return newBadge;
+}
+
+// ===== TIMER =====
+function startTimer(){
+  clearInterval(state.timerInterval); state.elapsed=0;
+  state.timerInterval=setInterval(()=>{
+    state.elapsed++;
+    document.getElementById('timer-display').textContent=formatTime(state.elapsed);
+  },1000);
+}
+function formatTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+
+// ===== NAV =====
+function confirmBackToMenu(){
+  const isAdult=state.mode==='adult';
+  document.getElementById('confirm-dialog').className='confirm-dialog'+(isAdult?' adult':'');
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('show');}
+function doBackToMenu(){closeConfirm();clearInterval(state.timerInterval);goTop();}
+function showFloat(x,y,text){
+  const el=document.createElement('div'); el.className='float-correct'; el.textContent=text;
+  el.style.left=x+'px'; el.style.top=(y+window.scrollY)+'px';
+  el.style.color=text==='✓'?'#22c55e':'#ff6b6b';
+  document.body.appendChild(el); setTimeout(()=>el.remove(),800);
+}
+function goTop(){showScreen('screen-top');renderBadges();updateTopStats();syncModeTabUI();}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active'); window.scrollTo(0,0);
+}
+
+// ===== HISTORY =====
+function showHistory(){
+  state.historyFilter='all';
+  renderHistoryScreen();
+  showScreen('screen-history');
+}
+function renderHistoryScreen(){
+  const players=['all',...new Set(state.history.map(h=>h.nickname))];
+  const tabs=document.getElementById('hist-filter-tabs'); tabs.innerHTML='';
+  players.forEach(p=>{
+    const btn=document.createElement('button');
+    btn.className='filter-tab'+(state.historyFilter===p?' active':'');
+    btn.textContent=p==='all'?'👥 全員':'👤 '+p;
+    btn.onclick=()=>{state.historyFilter=p;renderHistoryBody();tabs.querySelectorAll('.filter-tab').forEach((b,i)=>b.className='filter-tab'+(players[i]===p?' active':''));};
+    tabs.appendChild(btn);
+  });
+  renderHistoryBody();
+}
+function renderHistoryBody(){
+  const body=document.getElementById('history-body'); body.innerHTML='';
+  const filtered=state.historyFilter==='all'?state.history:state.history.filter(h=>h.nickname===state.historyFilter);
+  if(filtered.length===0){body.innerHTML='<div class="history-empty"><span class="he-icon">📭</span><p>まだ履歴がありません</p></div>';return;}
+  const avg=Math.round(filtered.reduce((s,h)=>s+h.accuracy,0)/filtered.length);
+  const best=filtered.reduce((b,h)=>(!b||h.elapsed<b)?h.elapsed:b,null);
+  const sumEl=document.createElement('div'); sumEl.className='history-summary';
+  sumEl.innerHTML=`<div class="hs-card"><div class="hs-val">${filtered.length}</div><div class="hs-label">プレイ回数</div></div><div class="hs-card"><div class="hs-val">${avg}%</div><div class="hs-label">平均正解率</div></div><div class="hs-card"><div class="hs-val">${best?formatTime(best):'—'}</div><div class="hs-label">ベストタイム</div></div>`;
+  body.appendChild(sumEl);
+  const label=document.createElement('div'); label.className='section-label';
+  label.textContent=state.historyFilter==='all'?'全プレイヤーの記録':state.historyFilter+' の記録';
+  body.appendChild(label);
+  filtered.forEach((h,i)=>{
+    const rc=i===0?'gold':i===1?'silver':i===2?'bronze':'normal';
+    const rt=i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
+    const bc=h.accuracy===100?'#22c55e':h.accuracy>=80?'#4d96ff':h.accuracy>=60?'#ffd93d':'#ff6b6b';
+    const card=document.createElement('div'); card.className='history-card';
+    card.innerHTML=`<div class="hc-rank ${rc}">${rt}</div><div class="hc-body"><div class="hc-top"><span class="hc-player">${h.nickname}</span><span class="hc-mode ${h.mode}">${h.mode==='kid'?'🐣キッズ':'🔥アドバンスド'}</span></div><div class="hc-bottom"><span class="hc-stat">正解率 <span>${h.accuracy}%</span></span><span class="hc-stat">タイム <span>${formatTime(h.elapsed)}</span></span><span class="hc-stat">正解 <span>${h.correct}/${h.total}</span></span><span class="hc-date">${h.date}</span></div><div class="hc-accuracy-bar"><div class="hc-accuracy-fill" style="width:${h.accuracy}%;background:${bc}"></div></div></div>`;
+    body.appendChild(card);
+  });
+}
+
+// ===== DASHBOARD =====
+function showDashboard(){
+  const players=[...new Set(state.history.map(h=>h.nickname))];
+  state.dashPlayer=players.length>0?players[0]:null;
+  renderDashboard();
+  showScreen('screen-dashboard');
+}
+
+function renderDashboard(){
+  const players=[...new Set(state.history.map(h=>h.nickname))];
+  const tabs=document.getElementById('dash-player-tabs'); tabs.innerHTML='';
+  players.forEach(p=>{
+    const btn=document.createElement('button');
+    btn.className='dash-tab'+(state.dashPlayer===p?' active':'');
+    btn.textContent='👤 '+p;
+    btn.onclick=()=>{state.dashPlayer=p;renderDashboard();};
+    tabs.appendChild(btn);
+  });
+  const body=document.getElementById('dash-body'); body.innerHTML='';
+  if(!state.dashPlayer||players.length===0){
+    body.innerHTML='<div class="dash-empty"><span class="de-icon">📭</span><p>まだデータがありません</p></div>';
+    return;
+  }
+  const ph=state.history.filter(h=>h.nickname===state.dashPlayer);
+  if(ph.length===0){body.innerHTML='<div class="dash-empty"><span class="de-icon">📭</span><p>このプレイヤーのデータがありません</p></div>';return;}
+
+  // --- Summary ---
+  const avg=Math.round(ph.reduce((s,h)=>s+h.accuracy,0)/ph.length);
+  const best=ph.reduce((b,h)=>(!b||h.elapsed<b)?h.elapsed:b,null);
+  const kidH=ph.filter(h=>h.mode==='kid'), adultH=ph.filter(h=>h.mode==='adult');
+  const kidAvg=kidH.length?Math.round(kidH.reduce((s,h)=>s+h.accuracy,0)/kidH.length):null;
+  const adultAvg=adultH.length?Math.round(adultH.reduce((s,h)=>s+h.accuracy,0)/adultH.length):null;
+  const sumSec=document.createElement('div'); sumSec.className='dash-section';
+  sumSec.innerHTML=`<h3>📊 総合サマリー — ${state.dashPlayer}</h3><div class="dash-summary">
+    <div class="ds-card"><div class="dc-val">${ph.length}</div><div class="dc-label">総プレイ回数</div></div>
+    <div class="ds-card"><div class="dc-val">${avg}%</div><div class="dc-label">平均正解率</div></div>
+    <div class="ds-card"><div class="dc-val">${best?formatTime(best):'—'}</div><div class="dc-label">ベストタイム</div></div>
+    <div class="ds-card"><div class="dc-val">${kidAvg!==null?kidAvg+'%':'—'} / ${adultAvg!==null?adultAvg+'%':'—'}</div><div class="dc-label">キッズ / アドバンスド 平均</div></div>
+  </div>`;
+  body.appendChild(sumSec);
+
+  // --- 成長グラフ + 週次グラフ ---
+  const recent10=[...ph].slice(0,10).reverse();
+  if(recent10.length>1){
+    const growthSec=document.createElement('div'); growthSec.className='dash-section';
+
+    // Trend arrow
+    const firstHalf=recent10.slice(0,Math.floor(recent10.length/2));
+    const secondHalf=recent10.slice(Math.floor(recent10.length/2));
+    const avgFirst=firstHalf.reduce((s,h)=>s+h.accuracy,0)/firstHalf.length;
+    const avgSecond=secondHalf.reduce((s,h)=>s+h.accuracy,0)/secondHalf.length;
+    const trend=avgSecond-avgFirst;
+    const trendIcon=trend>=5?'📈':trend<=-5?'📉':'➡️';
+    const trendText=trend>=5?`+${Math.round(trend)}% 伸びてる！`:trend<=-5?`${Math.round(trend)}% 要注意`:'横ばい';
+    const trendColor=trend>=5?'#22c55e':trend<=-5?'#ff6b6b':'#aaa';
+
+    const bars=recent10.map((h)=>{
+      const bc=h.accuracy===100?'#22c55e':h.accuracy>=80?'#4d96ff':h.accuracy>=60?'#ffd93d':'#ff6b6b';
+      const practMark=h.isPractice?'<div style="font-size:8px;color:#f59e0b;margin-top:1px">🎯</div>':'';
+      return '<div class="g-bar-wrap">'
+        +'<div class="g-bar" style="height:'+h.accuracy+'%;background:'+bc+'" title="'+h.accuracy+'%"></div>'
+        +'<div class="g-bar-label">'+h.accuracy+'%</div>'
+        +practMark
+        +'</div>';
+    }).join('');
+
+    growthSec.innerHTML='<h3>📈 正解率の推移（直近'+recent10.length+'回）'
+      +'<span style="font-size:12px;color:'+trendColor+';margin-left:8px">'+trendIcon+' '+trendText+'</span></h3>'
+      +'<div class="growth-chart"><div class="growth-bars">'+bars+'</div></div>'
+      +'<p style="font-size:10px;color:#ccc;margin-top:4px">🎯=苦手練習</p>';
+    body.appendChild(growthSec);
+  }
+
+  // --- 週次グラフ（過去6週） ---
+  if(ph.length>=3){
+    const weeklySec=document.createElement('div'); weeklySec.className='dash-section';
+    // Group by week
+    const weekMap={};
+    ph.forEach(h=>{
+      // Parse date string "YYYY/MM/DD HH:mm"
+      const parts=h.date.split('/');
+      if(parts.length<3) return;
+      const d=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2].split(' ')[0]));
+      // Week key: Monday of the week
+      const day=d.getDay();
+      const monday=new Date(d); monday.setDate(d.getDate()-(day===0?6:day-1));
+      const wk=monday.getFullYear()+'/'+(monday.getMonth()+1)+'/'+monday.getDate();
+      if(!weekMap[wk]) weekMap[wk]=[];
+      weekMap[wk].push(h.accuracy);
+    });
+    const weekKeys=Object.keys(weekMap).sort().slice(-6);
+    if(weekKeys.length>=2){
+      const maxGames=Math.max(...weekKeys.map(wk=>weekMap[wk].length));
+      const weekBars=weekKeys.map(wk=>{
+        const games=weekMap[wk].length;
+        const avgAcc=Math.round(weekMap[wk].reduce((s,a)=>s+a,0)/games);
+        const barH=Math.round(games/maxGames*80);
+        const bc=avgAcc>=80?'#4d96ff':avgAcc>=60?'#ffd93d':'#ff6b6b';
+        const label=wk.slice(5); // MM/D
+        return '<div class="g-bar-wrap" title="平均'+avgAcc+'% / '+games+'回">'
+          +'<div class="g-bar" style="height:'+barH+'px;background:'+bc+';border-radius:6px 6px 0 0;min-height:4px"></div>'
+          +'<div class="g-bar-label">'+label+'</div>'
+          +'<div style="font-size:9px;color:#aaa">'+games+'回</div>'
+          +'</div>';
+      }).join('');
+      weeklySec.innerHTML='<h3>📅 週ごとのプレイ回数（過去'+weekKeys.length+'週）</h3>'
+        +'<div class="growth-chart"><div class="growth-bars">'+weekBars+'</div></div>';
+      body.appendChild(weeklySec);
+    }
+  }
+
+  // --- 苦手な段 ヒートマップ + ランキング ---
+  // Aggregate danStats across all history
+  const danAgg={}; // {dan:{correct,wrong}}
+  ph.forEach(h=>{
+    if(!h.danStats) return;
+    Object.entries(h.danStats).forEach(([dan,s])=>{
+      if(!danAgg[dan]) danAgg[dan]={correct:0,wrong:0};
+      danAgg[dan].correct+=s.correct; danAgg[dan].wrong+=s.wrong;
+    });
+  });
+  const danKeys=Object.keys(danAgg).map(Number).sort((a,b)=>a-b);
+
+  if(danKeys.length>0){
+    // Weakness ranking
+    const weakSec=document.createElement('div'); weakSec.className='dash-section';
+    const danList=[...danKeys].sort((a,b)=>{
+      const ra=danAgg[a], rb=danAgg[b];
+      const pa=ra.correct/(ra.correct+ra.wrong), pb=rb.correct/(rb.correct+rb.wrong);
+      return pa-pb;
+    });
+    const listHTML=danList.slice(0,9).map(dan=>{
+      const s=danAgg[dan], total=s.correct+s.wrong;
+      const pct=Math.round(s.correct/total*100);
+      const isOk=pct>=80;
+      const bc=pct>=80?'#22c55e':pct>=60?'#4d96ff':pct>=40?'#ffd93d':'#ff6b6b';
+      const itemClass='wl-item'+(isOk?' ok':'');
+      const danClass='wl-dan'+(isOk?' ok':'');
+      return '<div class="'+itemClass+'">'
+        +'<div class="'+danClass+'">'+dan+'の段</div>'
+        +'<div class="wl-bar-wrap"><div class="wl-bar" style="width:'+pct+'%;background:'+bc+'"></div></div>'
+        +'<div class="wl-pct" style="color:'+bc+'">'+pct+'%</div>'
+        +'</div>';
+    }).join('');
+    weakSec.innerHTML=`<h3>🎯 段ごとの正解率（苦手順）</h3><div class="weakness-list">${listHTML}</div>`;
+    body.appendChild(weakSec);
+
+    // Rich growth comments
+    const weakest=danList[0];
+    const weakPct=Math.round(danAgg[weakest].correct/(danAgg[weakest].correct+danAgg[weakest].wrong)*100);
+    const strongDans=danList.filter(d=>{const s=danAgg[d],t=s.correct+s.wrong;return t>0&&s.correct/t>=0.9;});
+
+    // Check recent improvement on weakest dan
+    const recentPh=[...ph].slice(0,5);
+    const recentWeak=recentPh.filter(h=>h.danStats&&h.danStats[weakest]);
+    let recentWeakPct=null;
+    if(recentWeak.length>0){
+      let rc=0,rw=0;
+      recentWeak.forEach(h=>{rc+=h.danStats[weakest].correct;rw+=h.danStats[weakest].wrong;});
+      recentWeakPct=rc+rw>0?Math.round(rc/(rc+rw)*100):null;
+    }
+    const improving=recentWeakPct!==null&&recentWeakPct>weakPct;
+
+    const adviceSec=document.createElement('div'); adviceSec.className='dash-section';
+    let lines=[];
+
+    // Overall score comment
+    const overallAvg=Math.round(ph.reduce((s,h)=>s+h.accuracy,0)/ph.length);
+    if(overallAvg===100) lines.push('🏆 <b>全問正解が続いています！</b>素晴らしいです！');
+    else if(overallAvg>=90) lines.push('🌟 <b>全体的にとても良い正解率</b>です。この調子！');
+    else if(overallAvg>=70) lines.push('😊 <b>良いペース</b>で練習できています！');
+    else lines.push('💪 まだ伸びしろがたくさんあります。一緒にがんばりましょう！');
+
+    // Weak dan comment
+    if(weakPct<50){
+      lines.push('😟 <b>'+weakest+'の段</b>の正解率が<b>'+weakPct+'%</b>とかなり低いです。「苦手集中練習」で重点的に練習しましょう！');
+    } else if(weakPct<80){
+      if(improving) lines.push('📈 <b>'+weakest+'の段</b>は最近伸びてきています（直近 '+recentWeakPct+'%）！引き続き練習しましょう。');
+      else lines.push('🎯 <b>'+weakest+'の段</b>（正解率'+weakPct+'%）が苦手です。「苦手集中練習」を使ってみてください。');
+    } else {
+      lines.push('✅ 苦手な段も<b>'+weakPct+'%以上</b>クリアできています！');
+    }
+
+    // Strong dans comment
+    if(strongDans.length>0){
+      lines.push('💯 <b>'+strongDans.slice(0,3).join('、')+'の段</b>は得意です！');
+    }
+
+    // Streak comment
+    if(state.playStreak>=7) lines.push('🔥 <b>'+state.playStreak+'日連続</b>プレイ中！継続は力なり！');
+    else if(state.playStreak>=3) lines.push('⚡ <b>'+state.playStreak+'日連続</b>プレイ中！');
+
+    // Practice mode usage
+    const practiceCount=ph.filter(h=>h.isPractice).length;
+    if(practiceCount>0) lines.push('🎯 苦手集中練習を<b>'+practiceCount+'回</b>活用しています！');
+
+    adviceSec.innerHTML='<h3>💡 コーチからのアドバイス</h3>'
+      +'<div style="display:flex;flex-direction:column;gap:10px">'
+      +lines.map(l=>'<div style="font-size:13px;line-height:1.7;color:#555;padding:10px 14px;background:#f9f9f9;border-radius:12px;border-left:3px solid var(--kid-primary)">'+l+'</div>').join('')
+      +'</div>';
+    body.appendChild(adviceSec);
+  }
+
+  // --- バッジ一覧 ---
+  const badges=getBadges(state.dashPlayer);
+  const badgeSec=document.createElement('div'); badgeSec.className='dash-section';
+  const badgeHTML=BADGE_DEFS.map(b=>`<div class="badge${badges[b.id]?' earned':' locked'}" title="${b.name}" style="width:40px;height:40px;font-size:20px">${b.icon}</div>`).join('');
+  badgeSec.innerHTML=`<h3>🏅 バッジ</h3><div class="badge-list">${badgeHTML}</div>`;
+  body.appendChild(badgeSec);
+
+  // --- 直近の記録 ---
+  const recentSec=document.createElement('div'); recentSec.className='dash-section';
+  const rows=ph.slice(0,8).map(h=>{
+    const cls=h.accuracy===100?'great':h.accuracy>=80?'good':h.accuracy>=60?'ok':'poor';
+    return `<tr><td>${h.date}</td><td><span class="hc-mode ${h.mode}">${h.mode==='kid'?'🐣':'🔥'}</span></td><td><span class="acc-badge ${cls}">${h.accuracy}%</span></td><td>${formatTime(h.elapsed)}</td><td>${h.correct}/${h.total}</td></tr>`;
+  }).join('');
+  recentSec.innerHTML=`<h3>📅 直近の記録</h3><table class="recent-table"><thead><tr><th>日時</th><th>モード</th><th>正解率</th><th>タイム</th><th>正解数</th></tr></thead><tbody>${rows}</tbody></table>`;
+  body.appendChild(recentSec);
+}
+
+init();
+</script>
+
+<script>
+// Keyboard / numpad input support (runs after main script)
+document.addEventListener('keydown', function(e) {
+  const gameScreen = document.getElementById('screen-game');
+  if (!gameScreen || !gameScreen.classList.contains('active')) return;
+
+  if (e.key >= '0' && e.key <= '9') {
+    e.preventDefault();
+    numInput(e.key);
+
+  } else if (e.key === 'Backspace' || e.key === 'Delete') {
+    e.preventDefault();
+    numDel();
+
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (state.selected) {
+      numConfirm();
+      // After confirm, move to next empty cell
+      moveToNextCell(1);
+    } else {
+      // If judge button is ready, trigger it
+      const judgeBtn = document.getElementById('btn-judge');
+      if (judgeBtn.classList.contains('ready')) judgeAll();
+    }
+
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    moveToNextCell(e.shiftKey ? -1 : 1);
+
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault(); moveByCellDelta(0, 1);
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault(); moveByCellDelta(0, -1);
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault(); moveByCellDelta(1, 0);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault(); moveByCellDelta(-1, 0);
+  }
+});
+
+// Move to next/prev unfilled cell in reading order (left→right, top→bottom)
+function moveToNextCell(dir) {
+  const allCells = [];
+  state.rows.forEach(r => state.cols.forEach(c => allCells.push({r, c, key:`${r},${c}`})));
+
+  const currentIdx = state.selected
+    ? allCells.findIndex(x => x.key === state.selected)
+    : -1;
+
+  let checked = 0;
+  let idx = currentIdx;
+  while (checked < allCells.length) {
+    idx = (idx + dir + allCells.length) % allCells.length;
+    const cell = allCells[idx];
+    if (!state.cells[cell.key]?.filled) {
+      selectCell(cell.r, cell.c);
+      // Scroll cell into view
+      const el = document.getElementById(`cell-${cell.r}-${cell.c}`);
+      if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
+    }
+    checked++;
+  }
+}
+
+// Move by row/col delta from current selection (arrow keys)
+function moveByCellDelta(rowDelta, colDelta) {
+  if (!state.selected) {
+    moveToNextCell(1);
+    return;
+  }
+  const [curR, curC] = state.selected.split(',').map(Number);
+  const rIdx = state.rows.indexOf(curR);
+  const cIdx = state.cols.indexOf(curC);
+  const newRIdx = rIdx + rowDelta;
+  const newCIdx = cIdx + colDelta;
+  if (newRIdx >= 0 && newRIdx < state.rows.length && newCIdx >= 0 && newCIdx < state.cols.length) {
+    const newR = state.rows[newRIdx];
+    const newC = state.cols[newCIdx];
+    const key = `${newR},${newC}`;
+    if (!state.cells[key]?.filled) {
+      selectCell(newR, newC);
+      const el = document.getElementById(`cell-${newR}-${newC}`);
+      if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+}
+</script>
+</body>
+</html>
